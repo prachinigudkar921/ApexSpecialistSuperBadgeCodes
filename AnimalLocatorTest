@@ -1,0 +1,11 @@
+@isTest
+public class AnimalLocatorTest 
+{
+	@isTest
+    Static void dummyRESTMethod()
+    {
+        Test.setMock(HttpCalloutMock.class, new AnimalLocatorMock());
+        string result = AnimalLocator.getAnimalNameById(1);
+        system.assertEquals('chicken', result);
+    }
+}
