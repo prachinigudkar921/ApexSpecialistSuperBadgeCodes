@@ -1,0 +1,29 @@
+@isTest
+public class AddPrimaryContactTest 
+{
+	@isTest
+    static void dummyMethod() 
+    {
+        List<Account> accList = new List<Account>();
+        for (Integer i = 0; i < 50; i++) 
+        {
+            accList.add(new Account(billingState= 'NY', name='Test Account1'+i));
+        }
+        for(Integer j = 0; j < 50; j++)
+        {
+            accList.add(new Account (billingState= 'CA', name= 'Test Account2'+j));
+        }
+        insert accList;
+        
+        Contact con = New Contact();
+        con.FirstName= 'Test';
+        con.LastName= 'Contact';
+        insert con;
+        string State = 'CA';
+        
+        AddPrimaryContact apc= new AddPrimaryContact(con, state);
+        Test.startTest();
+        	system.enqueueJob(apc);
+        Test.stopTest();
+    }
+}
