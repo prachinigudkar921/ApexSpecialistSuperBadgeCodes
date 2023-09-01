@@ -1,0 +1,17 @@
+public class DailyLeadProcessor Implements Schedulable
+{
+	public void execute (schedulableContext sc)
+    {
+        List <Lead> GetLeadList= [SELECT LeadSource FROM Lead WHERE LeadSource='' LIMIT 200];
+        List<Lead> leadList = new List<Lead>();
+        if(GetLeadList != Null)
+        {
+            FOR(Lead l:GetLeadList)
+            {
+                l.LeadSource = 'Dreamforce';
+                leadList.add(l);
+            }
+            update leadList;
+        }
+    }
+}
