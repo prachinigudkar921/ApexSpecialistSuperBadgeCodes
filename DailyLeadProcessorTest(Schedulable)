@@ -1,0 +1,22 @@
+@isTest
+public class DailyLeadProcessorTest 
+{
+    public static String CRON_EXP = '0 0 0 15 3 ? 2024';
+	@isTest
+    public static void dummyMethod()
+    {
+        List<Lead> insertlLIst = new List<Lead>();
+        For(Integer i=0;i<200;i++)
+        {
+            insertlLIst.add(new Lead(FirstName= 'Test', LastName= 'Lead'+i, company= 'AT'+i, Status= 'Open - Not Contacted'));
+        }
+        insert insertlLIst;
+        
+        Test.startTest();
+        String jobId = System.schedule('ScheduledApexTest',
+            CRON_EXP,
+            new DailyLeadProcessor());
+        Test.stopTest();
+        System.assertEquals(200,[Select count() from Lead Where LeadSource= 'Dreamforce']);
+    }
+}
