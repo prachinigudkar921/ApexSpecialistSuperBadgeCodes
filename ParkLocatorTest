@@ -1,0 +1,11 @@
+@isTest
+public class ParkLocatorTest 
+{
+    @isTest
+	static void dummyCalloutMethod()
+    {
+        test.setMock(webServiceMock.class, new ParkServiceMock());
+        String[] result = ParkLocator.country('India');
+        system.assertEquals(new string[] {'Hamburg Wadden Sea National Park','Hainich National Park', 'Bavarian Forest National Park'}, result);
+    }
+}
