@@ -19,20 +19,18 @@ public with sharing class WarehouseCalloutService implements Queueable
             List<Object> jsonResponse = (List<Object>)JSON.deserializeUntyped(response.getBody());
             System.debug(response.getBody());
             
-            //class maps the following fields: replacement part (always true), cost, current inventory, lifespan, maintenance cycle, and warehouse SKU
-            //warehouse SKU will be external ID for identifying which equipment records to update within Salesforce
             for (Object eq : jsonResponse)
             {
-                Map<String,Object> mapJson = (Map<String,Object>)eq;
+                Map<String,Object> eqpMap = (Map<String,Object>)eq;
                 Product2 prod = new Product2();
-                prod.Replacement_Part__c = (Boolean) mapJson.get('replacement');
-                prod.Name = (String) mapJson.get('name');
-                prod.Maintenance_Cycle__c = (Integer) mapJson.get('maintenanceperiod');
-                prod.Lifespan_Months__c = (Integer) mapJson.get('lifespan');
-                prod.Cost__c = (Integer) mapJson.get('cost');
-                prod.Warehouse_SKU__c = (String) mapJson.get('sku');
-                prod.Current_Inventory__c = (Double) mapJson.get('quantity');
-                prod.ProductCode = (String) mapJson.get('_id');
+                prod.Replacement_Part__c = (Boolean) eqpMap.get('replacement');
+                prod.Name = (String) eqpMap.get('name');
+                prod.Maintenance_Cycle__c = (Integer) eqpMap.get('maintenanceperiod');
+                prod.Lifespan_Months__c = (Integer) eqpMap.get('lifespan');
+                prod.Cost__c = (Integer) eqpMap.get('cost');
+                prod.Warehouse_SKU__c = (String) eqpMap.get('sku');
+                prod.Current_Inventory__c = (Double) eqpMap.get('quantity');
+                prod.ProductCode = (String) eqpMap.get('_id');
                 EquipmentList.add(prod);
             }
             
