@@ -1,0 +1,12 @@
+@isTest
+public with sharing class WarehouseSyncScheduleTest 
+{
+    public static String CRON_EXP = '0 0 0 15 3 ? 2042';
+    @IsTest
+    static void testScheduledJob() 
+    {
+    	String jobId = System.schedule('ScheduledApexTest',
+            CRON_EXP,new WarehouseSyncSchedule());
+        system.assertEquals(True, jobId != Null);
+    }
+}
