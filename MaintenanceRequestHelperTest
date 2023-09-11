@@ -1,0 +1,54 @@
+@isTest
+public with sharing class MaintenanceRequestHelperTest {
+    // implement scheduled code here
+    // Create a case with status working and type repair || Routine mentainance
+    // create equipment mentainance cycle--> r/t equipment--> r/t case.
+	@TestSetup
+    Public static void testSetupMainReqMethod()
+    {
+        Test.startTest();
+        Product2 prod = new Product2();
+        prod.Name = 'Wiper Blade';
+        prod.Maintenance_Cycle__c = 15;
+        prod.Lifespan_Months__c = 3;
+        prod.Warehouse_SKU__c = '101';
+        prod.Replacement_Part__c= True;
+        insert prod;
+        
+        Case cs = new Case();
+        cs.Origin = 'Phone';
+        cs.Status = 'Working';
+        cs.Priority = 'Medium';
+        cs.Type = 'Repair';
+        cs.Equipment__c = prod.Id;
+        insert cs;
+        
+        Case ce = new Case();
+        ce.Origin = 'Phone';
+        ce.Status = 'Working';
+        ce.Priority = 'Medium';
+        ce.Type = 'Repair';
+        ce.Equipment__c = prod.Id;
+        insert ce;
+        
+		Equipment_Maintenance_Item__c eqMI = New Equipment_Maintenance_Item__c();
+        eqMI.Quantity__c = 5;
+        eqMI.Equipment__c = prod.id;
+        eqMI.Maintenance_Request__c = cs.Id;
+        insert eqMI;
+        Test.stopTest();
+    }    
+        @isTest
+        Public static void testMainReqMethod()
+        {
+            List<Case> cList = [SELECT Id, Status From Case];
+            for(Case cs: cList)
+            {
+                cs.Status = 'Closed';
+            }
+               
+            Update cList;
+            system.assertEquals(true, [Select id from case where status = 'New'].size()>1);
+            system.assertEquals(true, [Select id from case where status = 'Closed'].size()>1);
+        }
+}
