@@ -1,0 +1,78 @@
+public with sharing class MaintenanceRequestHelper
+{
+    public static void updateMaintenanceRequest(List<Case> cList, Map<Id,Case> oldCaseMap) 
+    {
+        Set<Id> caseIds = new Set<Id>();
+        
+        
+        For (Case c : cList){
+            if (oldCaseMap.get(c.Id).Status != 'Closed' && c.Status == 'Closed')
+            {
+                if (c.Type == 'Repair' || c.Type == 'Routine Maintenance')
+                {
+                    caseIds.add(c.Id);
+                }
+            }
+        }
+        
+        if (!caseIds.isEmpty())
+        {
+            List<Case> newCases = new List<Case>();
+            Map<Id,Case> closedCases = new Map<Id,Case>([SELECT Id, Vehicle__c, Equipment__c, Equipment__r.Maintenance_Cycle__c,
+                                                          (SELECT Id,Equipment__c,Quantity__c FROM Equipment_Maintenance_Items__r) 
+                                                         	FROM Case WHERE Id IN :caseIds]);
+            Map<Id,Decimal> getMCycle = new Map<ID,Decimal>();
+            AggregateResult[] minCycle = [SELECT Maintenance_Request__c, MIN(Equipment__r.Maintenance_Cycle__c)cycle
+                                         FROM Equipment_Maintenance_Item__c WHERE Maintenance_Request__c IN :caseIds 
+                                         GROUP BY Maintenance_Request__c];
+        
+        for (AggregateResult emc : minCycle)
+        { 
+            getMCycle.put((Id) emc.get('Maintenance_Request__c'), (Decimal) emc.get('cycle'));
+        }
+            
+            for(Case cs : closedCases.values())
+            {
+                Case nc = new Case (
+                    ParentId = cs.Id,
+                	Status = 'New',
+                    Subject = 'Routine Maintenance',
+                    Type = 'Routine Maintenance',
+                    Vehicle__c = cs.Vehicle__c,
+                    Equipment__c =cs.Equipment__c,
+                    Origin = 'Web',
+                    Date_Reported__c = Date.Today()
+                    
+                );
+                
+                If (getMCycle.containskey(cs.Id))
+                {
+                    Integer ccInt = (Integer) getMCycle.get(cs.Id);
+                    nc.Date_Due__c = Date.today().addDays(ccInt);
+                } 
+                else 
+                {
+                    Integer Intcc = (Integer) cs.Equipment__r.maintenance_Cycle__c;
+                    nc.Date_Due__c = Date.today().addDays(Intcc);
+                }
+                
+                newCases.add(nc);
+            }
+            
+           insert newCases;
+            
+           List<Equipment_Maintenance_Item__c> EMIclone = new List<Equipment_Maintenance_Item__c>();
+           for (Case nc : newCases)
+           {
+                for (Equipment_Maintenance_Item__c EMI : closedCases.get(nc.ParentId).Equipment_Maintenance_Items__r)
+                {
+                    Equipment_Maintenance_Item__c newEmi = EMI.clone();
+                    newEmi.Maintenance_Request__c = nc.Id;
+                    EMIclone.add(newEmi);
+                    
+                }
+            }
+            insert EMIclone;
+        }
+    }
+}
